@@ -1,0 +1,126 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+
+@media (orientation: landscape){
+    html{
+        font-size: 18px;
+    }
+    
+}
+
+@media (orientation: portrait){
+    html{
+        font-size: 20px;
+    }
+    div.container{
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+
+    div.canvas{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #fff8f4;
+    }
+    
+    #imgShow{
+        max-width: 100%;
+        max-height: 100%;
+
+    }
+    div.title{
+        display: flex;
+        width: 100%;
+    }
+    
+    #textTitle{
+        flex: 1;
+        font-size: 0.81rem;
+    }
+    div.button-canvas{
+        display: flex;
+    }
+    
+    div.button-item{
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    div.button-item > button.function{
+        width: 4rem;
+        height: 4rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    div.button-item > button.function > span{
+        display: none;
+    }
+    .icon{
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+    #item-list{
+        flex: 1;
+        overflow-y: auto;
+    }
+    div.item{
+        display: flex;
+        align-items: center;
+    }
+    div.item-block{
+        display: flex;
+        align-items: center;
+    }
+    input[type="checkbox"]{
+        width: 2rem;
+        height: 2rem;
+    }
+    input[type="color"]{
+        width: 2rem;
+        height: 2rem;
+    }
+    input[data-type="if"], input[data-type="then"]{
+        width: calc(50% - 0.6rem);
+        line-height: 1.5rem;
+        padding: 0.2rem 0.2rem 0.2rem 0.2rem;
+        font-size: 1.2rem;
+        
+    }
+    select{
+        width: 3rem;
+        text-align: center;
+        font-size: 0.8rem;
+    }
+
+}
+
+#downloadLink{
+    display: none;
+}
+canvas{
+    border: 1px solid black;
+}
+
+#canvasDownload{
+    display: none;
+}
+
+button.function{
+    display: flex;
+    align-items: center;
+    padding: 0.2rem;
+    cursor: pointer;
+}
+
+button.function > span{
+    font-size: 0.9rem;
+}
+
