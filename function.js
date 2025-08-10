@@ -42,33 +42,58 @@ const setting = {
 };
 const colorDefault = ['f596aa', 'fc9f4d', '0089a7', '707c74', 'ddd23b', 'c99833', '268785', '3a8fb7', '005caf', '4a225d', '6d2e5b', '855b32', '8f5a3c', 'a35e37', 'e83015', '9e7a7a', '787d7b'];
 
+const undoList = [];
+const redoList = [];
 window.addEventListener('load', initializeBody);
 
 /**
- * 勾選方塊變更時的事件
+ * 變更輸入框或顏色或選單的事件，會補繪製的動作
  * @param {Event} event 
  */
-function changeCheckbox(event){
-    const isChecked = event.target.checked;
-    const allChecked = document.getElementById('item-list').querySelectorAll('input[type="checkbox"]:checked');
-    for(const item of allChecked){
-        item.checked = false;
-    }
-    
-    event.target.checked = isChecked;
-    
-    checkButton();
+function changeAndDraw(event){
+    changeValue(event);
+    draw();
+}
 
+/**
+ * 變更輸入框或顏色或選單的事件
+ * @param {Event} event 
+ */
+function changeValue(event){
+    const dom = event.currentTarget;
+    const type = dom.getAttribute('data-type');
+    const oldValue = dom.getAttribute('data-value');
+    if (type === 'title-text'){
+        const id = dom.getAttribute('id');
+        setStep(['text', type, id, oldValue]);
+    }
+    else if (type === 'if' || type === 'then'){
+        const index = getItemIndex(dom.parentNode.parentNode);
+        setStep(['text', type, index, oldValue]);
+    }
+    else if (type === 'item-color'){
+        const index = getItemIndex(dom.parentNode.parentNode);
+        setStep(['color', index, oldValue]);
+    }
+    else if (type === 'size-select'){
+        setStep(['size', oldValue]);
+    }
+    else{
+        const id = dom.getAttribute('id');
+        setStep(['color', id, oldValue]);
+    }
+    dom.setAttribute('data-value', dom.value);
+    checkButton();
 }
 
 /**
  * 更新功能按鈕是否 disable
  */
 function checkButton(){
-    const selectItem = getSelectItem();
-    if (selectItem){
-        resetButton('up', selectItem.previousSibling != null);
-        resetButton('down', selectItem.nextSibling != null);
+    const indexs = getSelectItemIndex();
+    if (indexs.length > 0){
+        resetButton('up', indexs[0] !== 0);
+        resetButton('down', indexs[indexs.length - 1] !== getItemList().length - 1);
         resetButton('delete', true);
     }
     else{
@@ -76,20 +101,31 @@ function checkButton(){
         resetButton('down', false);
         resetButton('delete', false);
     }
+    resetButton('undo', undoList.length > 0);
+    resetButton('redo', redoList.length > 0);
+
 }
 
 /**
  * 顏色下移按鈕點擊事件
  */
 function clickColorDown(){
+    const indexs = getSelectItemIndex();
+    setStep(['move', 'color', 'down', indexs]);
     move('color', 'down');
+    draw();
+    checkButton();
 }
 
 /**
  * 顏色上移按鈕點擊事件
  */
 function clickColorUp(){
+    const indexs = getSelectItemIndex();
+    setStep(['move', 'color', 'up', indexs]);
     move('color', 'up');
+    draw();
+    checkButton();
 }
 
 /**
@@ -97,6 +133,16 @@ function clickColorUp(){
  */
 function clickItemCreate(){
     createItem();
+    const items = getItemList();
+    const index = items.length - 1;
+    const item = items[index];
+    item.querySelector('input[data-type="if"]').focus();
+    const info = {};
+    info['index'] = index;
+    info['color'] = item.querySelector('input[type="color"]').value;
+    info['if'] = '';
+    info['then'] = '';
+    setStep(['create', [info]]);
     checkButton();
     draw();
 }
@@ -105,7 +151,9 @@ function clickItemCreate(){
  * 移除項目按鈕點擊事件
  */
 function clickItemDelete(){
-    deleteItem();
+    const [itemToDelete, deleteInfo] = getDeleteInfo();
+    setStep(['delete', deleteInfo]);
+    deleteItem(itemToDelete);
     checkButton();
     draw();
 }
@@ -114,28 +162,44 @@ function clickItemDelete(){
  * 項目下移按鈕點擊事件
  */
 function clickItemDown(){
+    const indexs = getSelectItemIndex();
+    setStep(['move', 'item', 'down', indexs]);
     move('item', 'down');
+    draw();
+    checkButton();
 }
 
 /**
  * 項目上移按鈕點擊事件
  */
 function clickItemUp(){
+    const indexs = getSelectItemIndex();
+    setStep(['move', 'item', 'up', indexs]);
     move('item', 'up');
+    draw();
+    checkButton();
 }
 
 /**
  * 文字下移按鈕點擊事件
  */
 function clickTextDown(){
+    const indexs = getSelectItemIndex();
+    setStep(['move', 'text', 'down', indexs]);
     move('text', 'down');
+    draw();
+    checkButton();
 }
 
 /**
  * 文字上移按鈕點擊事件
  */
 function clickTextUp(){
+    const indexs = getSelectItemIndex();
+    setStep(['move', 'text', 'up', indexs]);
     move('text', 'up');
+    draw();
+    checkButton();
 }
 
 /**
@@ -169,7 +233,7 @@ function convertBase64ToText(base64){
 /**
  * 產生新的項目，自動附加在尾端
  */
-function createItem(colorValue, ifText, thenText){
+function createItem(colorValue, ifText, thenText, index){
     const docFrag = document.createDocumentFragment();
     const divItem = document.createElement('div');
     divItem.className = 'item';
@@ -182,31 +246,43 @@ function createItem(colorValue, ifText, thenText){
     divItem.appendChild(divBlock2);
     const checkbox = document.createElement('input');
     checkbox.setAttribute('type', 'checkbox');
-    checkbox.addEventListener('change', changeCheckbox);
+    checkbox.addEventListener('change', checkButton);
     divBlock1.appendChild(checkbox);
     const color = document.createElement('input');
     color.setAttribute('type', 'color');
-    color.addEventListener('change', draw);
-    color.value = colorValue ? colorValue : ('#' + getColor());
+    color.setAttribute('data-type', 'item-color');
+    color.addEventListener('change', changeValue);
+    color.value = colorValue ? colorValue : ('#' + getDefaultColor());
+    color.setAttribute('data-value', color.value);
     divBlock1.appendChild(color);
     const inputIf = document.createElement('input');
     inputIf.setAttribute('type', 'text');
     inputIf.setAttribute('data-type', 'if');
     inputIf.setAttribute('placeholder', '若…');
     inputIf.value = ifText ? ifText : '';
+    inputIf.setAttribute('data-value', inputIf.value);
     inputIf.addEventListener('keyup', draw);
     inputIf.addEventListener('focus', focusTextbox);
+    inputIf.addEventListener('change', changeValue);
     divBlock2.appendChild(inputIf);
     const inputThen = document.createElement('input');
     inputThen.setAttribute('type', 'text');
     inputThen.setAttribute('data-type', 'then');
     inputThen.setAttribute('placeholder', '則…');
     inputThen.value = thenText ? thenText : '';
+    inputThen.setAttribute('data-value', inputThen.value);
     inputThen.addEventListener('keyup', draw);
     inputThen.addEventListener('focus', focusTextbox);
+    inputThen.addEventListener('change', changeValue);
     divBlock2.appendChild(inputThen);
 
-    document.getElementById('item-list').appendChild(docFrag);
+    const itemList = document.getElementById('item-list');
+    if (index == undefined){
+        itemList.appendChild(docFrag);
+    }
+    else{
+        itemList.insertBefore(docFrag, itemList.children[index]);
+    }
 }
 
 /**
@@ -214,7 +290,7 @@ function createItem(colorValue, ifText, thenText){
  * @param {object} presetData 傳入變數轉換後的物件
  */
 function createPresetData(presetData){
-    document.querySelector('textarea').value = presetData['title'];
+    setText('textTitle', presetData['title']);
     const datas = presetData['data'];
     const n = datas.length;
     for (let i = 0; i < n; i++){
@@ -222,22 +298,106 @@ function createPresetData(presetData){
         createItem(data[0], data[1], data[2]);
     }
     setSelectWidth(presetData['size']);
-    setFontColor(presetData['fontColor']);
-    setCanvasColor(presetData['canvasColor']);
-    setTitleColor(presetData['titleColor']);
+    setColor('font-color', presetData['fontColor']);
+    setColor('canvas-color', presetData['canvasColor']);
+    setColor('title-color', presetData['titleColor']);
 }
 
 /**
  * 移除選擇的項目
  * @returns 
  */
-function deleteItem(){
-    const itemToDelete = getSelectItem();
-    if (itemToDelete){
-        remove(itemToDelete);
+function deleteItem(itemToDelete){
+    if (itemToDelete.length > 0){
+        for (const item of itemToDelete){
+            remove(item);
+        }
     }
 }
 
+/**
+ * 復原或重做的實作內容
+ * @param {any[]} data 復原或重做的資料
+ * @returns 對應的動作資料
+ */
+function doStep(data){
+    const recover = [];
+    switch(data[0]){
+        case 'delete':{
+            recover.push('create');
+            const deleteInfo = data[1];
+            recover.push(deleteInfo);
+            const checkIndex = [];
+            for (const info of deleteInfo){
+                createItem(info['color'], info['if'], info['then'], info['index']);
+                checkIndex.push(info['index']);
+            }
+            selectItem(checkIndex);
+            break;
+        }
+        case 'create':{
+            recover.push('delete');
+            const createInfo = data[1];
+            recover.push(createInfo);
+            const checkIndex = [];
+            for (const info of createInfo){
+                checkIndex.push(info['index']);
+            }
+            selectItem(checkIndex);
+            const itemToDelete = getSelectItem();
+            deleteItem(itemToDelete);
+            break;
+        }
+        case 'text': {
+            recover.push(data[0]);
+            recover.push(data[1]);
+            recover.push(data[2]);
+            // ['text', 'title-text', 'textTitle', 'foo']
+            // ['text', 'if', 3, 'foo']
+            const oldValue = setText(data[2], data[3], data[1]);
+            recover.push(oldValue);
+            break;
+        }
+        case 'color': {
+            recover.push(data[0]);
+            recover.push(data[1]);
+            // ['color', 'font-color', '#000000']
+            // ['color', 3, '#ffffff']
+            const oldValue = setColor(data[1], data[2]);
+            recover.push(oldValue);
+            break;
+        }
+        case 'move': {
+            recover.push(data[0]);
+            recover.push(data[1]);
+            const recoverIndex = [];
+            const indexs = data[3];
+            if (data[2] === 'up'){
+                recover.push('down');
+                for (const index of indexs){
+                    recoverIndex.push(index - 1);
+                }
+            }
+            else{
+                recover.push('up');
+                for (const index of indexs){
+                    recoverIndex.push(index + 1);
+                }
+            }
+            recover.push(recoverIndex);
+            selectItem(recoverIndex);
+            move(data[1], recover[2], recoverIndex);
+            break;
+        }
+        case 'size': {
+            recover.push(data[0]);
+            const oldValue = setSelectWidth(data[1]);
+            recover.push(oldValue);
+            break;
+        }
+    }
+    return recover;
+}
 /**
  * 下載圖檔按鈕點擊事件
  */
@@ -259,7 +419,7 @@ function download(){
  * 畫圖
  */
 function draw(){
-    const selectWidth = getSelectSize();
+    const selectWidth = getValue('size-select');
     const [size, width, height, titleX, ifX, thenX, titleLineHeight, titleY, itemY, itemCount, titleLineCount, arcXstart, arcXend, lineXend, lineWidth, titleRectX, titleRectWidth, titleRectY, titleRectHeight, titleRectRadius, itemArcYstart, itemArcYend] = getPositionInfo(selectWidth);
     setCanvasSize(width, height);
     drawCanvas(size, titleX, ifX, thenX, titleLineHeight, titleY, itemY, itemCount, titleLineCount, arcXstart, arcXend, lineXend, lineWidth, titleRectX, titleRectWidth, titleRectY, titleRectHeight, titleRectRadius, itemArcYstart, itemArcYend);
@@ -293,7 +453,7 @@ function drawCanvas(size, titleX, ifX, thenX, titleLineHeight, titleY, itemY, it
     const canvas = document.getElementById('canvasDownload');
     const ctx = canvas.getContext('2d');
     //ctx.fillStyle = window.getComputedStyle(document.querySelector('div.canvas')).backgroundColor;
-    const bgColor = getCanvasColor();
+    const bgColor = getValue('canvas-color');
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     document.querySelector('div.canvas').style.backgroundColor = bgColor;
@@ -330,7 +490,7 @@ function drawCanvas(size, titleX, ifX, thenX, titleLineHeight, titleY, itemY, it
         ctx.stroke();
 
         // 寫 若 文字
-        ctx.fillStyle = getFontColor();
+        ctx.fillStyle = getValue('font-color');
         const ifText = ifList[i];
         if (ifText && ifText.length > 0){
             ctx.fillText(ifText, ifX, ifThenTextY);
@@ -343,13 +503,13 @@ function drawCanvas(size, titleX, ifX, thenX, titleLineHeight, titleY, itemY, it
     }
     // 畫標題框
     ctx.beginPath();
-    ctx.fillStyle = getTitleColor();
+    ctx.fillStyle = getValue('title-color');
     ctx.lineWidth = 1;
     ctx.roundRect(titleRectX, titleRectY, titleRectWidth, titleRectHeight, titleRectRadius);
     ctx.fill();
 
     // 寫標題字
-    ctx.fillStyle = getFontColor();
+    ctx.fillStyle = getValue('font-color');
     ctx.font = `${size * setting.titleFontSize}px 微軟正黑體`;
     for (let i = 0; i < titleLineCount; i++){
         const line = titleLines[i];
@@ -364,28 +524,33 @@ function drawCanvas(size, titleX, ifX, thenX, titleLineHeight, titleY, itemY, it
  * @param {*} event 
  */
 function focusTextbox(event){
-    const focusItem = event.target.parentNode.parentNode;
-    const selectedCheckbox = getSelectCheckbox();
-    if (selectedCheckbox){
-        selectedCheckbox.checked = false;
+    const selectedItem = getSelectItem();
+    for (const item of selectedItem){
+        item.querySelector('input[type="checkbox"]').checked = false;
     }
+    const focusItem = event.currentTarget.parentNode.parentNode;
     focusItem.querySelector('input[type="checkbox"]').checked = true;
     checkButton();
 }
 
 /**
- * 取得畫布顏色
- * @returns 
+ * 取得每個項目中 顏色 的列表
+ * @returns {string[]}
  */
-function getCanvasColor(){
-    return document.getElementById('colCanvasBg').value;
+function getColorList(){
+    const result = [];
+    const items = getItemList();
+    for (const item of items){
+        result.push(item.querySelector('input[type="color"]').value);
+    }
+    return result;
 }
 
 /**
  * 選取一個顏色，已存在則跳過，全都存在則選第一個
  * @returns
  */
-function getColor(){
+function getDefaultColor(){
     const usedColorInputs = document.getElementById('item-list').querySelectorAll('input[type="color"]');
     for(const color of colorDefault){
         let isExist = false;
@@ -403,24 +568,28 @@ function getColor(){
 }
 
 /**
- * 取得每個項目中 顏色 的列表
- * @returns {string[]}
+ * 取得刪除項目動作的資訊，做為復原或重做用的資料
+ * @returns 
  */
-function getColorList(){
-    const result = [];
+function getDeleteInfo(){
     const items = getItemList();
-    for (const item of items){
-        result.push(item.querySelector('input[type="color"]').value);
+    const n = items.length;
+    const itemToDelete = getSelectItem();
+    const deleteInfo = [];
+    for (const item of itemToDelete){
+        for (let i = 0; i < n; i++){
+            if (items[i] === item){
+                const info = {};
+                info['index'] = i;
+                info['color'] = item.querySelector('input[type="color"]').value;
+                info['if'] = item.querySelector('input[data-type="if"]').value;
+                info['then'] = item.querySelector('input[data-type="then"]').value;
+                deleteInfo.push(info);
+                break;
+            }
+        }
     }
-    return result;
-}
-
-/**
- * 取得文字顏色
- * @returns {string}
- */
-function getFontColor(){
-    return document.getElementById('colFont').value;
+    return [itemToDelete, deleteInfo];
 }
 
 /**
@@ -438,11 +607,33 @@ function getIfThenTextList(type){
 }
 
 /**
+ * 取得指定項目 dom 所在的編號
+ * @param {*} itemToFind 
+ * @returns 
+ */
+function getItemIndex(itemToFind){
+    let index = 0;
+    const items = getItemList();
+    for (const item of items){
+        if (item === itemToFind){
+            break;
+        }
+        index++;
+    }
+    return index;
+}
+
+/**
  * 取得項目 DOM 列表
  * @returns {HTMLElement[]}
  */
-function getItemList(){
-    return document.getElementById('item-list').children;
+function getItemList(index){
+    if (index == undefined){
+        return document.getElementById('item-list').children;
+    }
+    else{
+        return document.getElementById('item-list').children[index];
+    }
 }
 
 /**
@@ -564,14 +755,12 @@ function getPositionYratio(titleLineCount, itemCount){
     return Math.max(byTitle, byItem);
 }
 
-
-
 /**
  * 取得勾選中的項目
  * @returns {HTMLElement}
  */
 function getSelectCheckbox(){
-    return document.getElementById('item-list').querySelector('input[type="checkbox"]:checked');
+    return document.getElementById('item-list').querySelectorAll('input[type="checkbox"]:checked');
 }
 
 /**
@@ -579,19 +768,31 @@ function getSelectCheckbox(){
  * @returns {HTMLElement}
  */
 function getSelectItem(){
-    const selectCheckbox = getSelectCheckbox();;
-    if (!selectCheckbox){
-        return null;
+    const items = getItemList();
+    const result = [];
+    for (const item of items){
+        if(item.querySelector('input[type="checkbox"]:checked')){
+            result.push(item);
+        }
     }
-    return selectCheckbox.parentNode.parentNode;
+    return result;
 }
 
 /**
- * 取得尺寸下拉選單的值
- * @returns {string}
+ * 取得有選取起來的項目的編號
+ * @returns 項目編號
  */
-function getSelectSize(){
-    return document.getElementById('selSize').value;
+function getSelectItemIndex(){
+    const items = getItemList();
+    const result = [];
+    let index = 0;
+    for (const item of items){
+        if(item.querySelector('input[type="checkbox"]:checked')){
+            result.push(index);
+        }
+        index++;
+    }
+    return result;
 }
 
 /**
@@ -614,13 +815,17 @@ function getTextSize(text){
     return size;
 }
 
-function getTitleColor(){
-    return document.getElementById('colTitleBg').value;
-}
-
+/**
+ * 取得標題文字每一個邛
+ * @returns 
+ */
 function getTitleLines(){
     const title = document.querySelector('textarea').value;
     return (title && title.length > 0) ? title.replaceAll('\r\n', '\n').split('\n') : [];
+}
+
+function getValue(id){
+    return document.getElementById(id).value;
 }
 
 /**
@@ -645,10 +850,10 @@ function initializeBody(){
  * 初始化各 DOM 的事件
  */
 function initializeEvent(){
-    document.getElementById('selSize').addEventListener('change', draw);
-    document.getElementById('colFont').addEventListener('change', draw);
-    document.getElementById('colCanvasBg').addEventListener('change', draw);
-    document.getElementById('colTitleBg').addEventListener('change', draw);
+    document.getElementById('size-select').addEventListener('change', changeAndDraw);
+    document.getElementById('font-color').addEventListener('change', changeAndDraw);
+    document.getElementById('canvas-color').addEventListener('change', changeAndDraw);
+    document.getElementById('title-color').addEventListener('change', changeAndDraw);
     document.getElementById('btnCreate').addEventListener('click', clickItemCreate);
     document.getElementById('btnDelete').addEventListener('click', clickItemDelete);
     document.getElementById('btnDownload').addEventListener('click', download);
@@ -659,7 +864,10 @@ function initializeEvent(){
     document.getElementById('btnColorDown').addEventListener('click', clickColorDown);
     document.getElementById('btnTextUp').addEventListener('click', clickTextUp);
     document.getElementById('btnTextDown').addEventListener('click', clickTextDown);
+    document.getElementById('btnUndo').addEventListener('click', undo);
+    document.getElementById('btnRedo').addEventListener('click', redo);
     document.querySelector('textarea').addEventListener('keyup', draw);
+    document.querySelector('textarea').addEventListener('change', changeValue);
     window.addEventListener('resize', resizeWindow);
 }
 
@@ -667,26 +875,36 @@ function initializeEvent(){
  * 移動項目
  * @param {string} type item/color/text
  * @param {string} direction up/down
+ * @param {number[]} indexs 項目的 index
  */
-function move(type, direction){
-    const selectItem = getSelectItem();
-    if (!selectItem){
+function move(type, direction, indexs){
+    if (indexs == undefined){
+        indexs = getSelectItemIndex();
+    }
+    if (indexs.length === 0){
         return;
     }
+    const n = getItemList().length;
     if (direction === 'up'){
-        if (!selectItem.previousSibling){
-            return;
+        for (let i = 0; i < indexs.length; i++){
+            const index = indexs[i];
+            if (index === 0){
+                continue;
+            }
+            const items = getItemList();
+            swap(type, items[index], items[index - 1]);
         }
-        swap(type, selectItem, selectItem.previousSibling);
     }
     else if (direction === 'down'){
-        if (!selectItem.nextSibling){
-            return;
+        for (let i = indexs.length - 1; i > -1; i--){
+            const index = indexs[i];
+            if (index === n - 1){
+                continue;
+            }
+            const items = getItemList();
+            swap(type, items[index], items[index + 1]);
         }
-        swap(type, selectItem, selectItem.nextSibling);
     }
-    draw();
-    checkButton();
 }
 
 /**
@@ -705,14 +923,28 @@ function presetData(){
         datas.push(data);
     }
     result['data'] = datas;
-    result['size'] = getSelectSize();
-    result['titleColor'] = getTitleColor();
-    result['fontColor'] = getFontColor();
-    result['canvasColor'] = getCanvasColor();
+    result['size'] = getValue('size-select');
+    result['titleColor'] = getValue('title-color');
+    result['fontColor'] = getValue('font-color');
+    result['canvasColor'] = getValue('canvas-color');
     // 序列化轉 Base64 再轉網址可接受字元，網頁更新
     const data = encodeURIComponent(convertTextToBase64(JSON.stringify(result)));
 
     location.href = `index.html?data=${data}`;
+}
+
+/**
+ * 重做動作
+ */
+function redo(){
+    if (redoList.length === 0){
+        return;
+    }
+    const data = redoList.pop();
+    const recover = doStep(data);
+    undoList.push(recover);
+    draw();
+    checkButton();
 }
 
 /**
@@ -722,13 +954,17 @@ function presetData(){
 function remove(divItem){
     // 移除 checkbox 的 onChange、input 的 onKeyup 和 onFocus 事件
     const checkbox = divItem.querySelector('input[type="checkbox"]');
-    checkbox.removeEventListener('change', changeCheckbox);
+    checkbox.removeEventListener('change', checkButton);
+    const color = divItem.querySelector('input[type="color"]');
+    color.removeEventListener('change', changeValue);
     const inputIf = divItem.querySelector('input[data-type="if"]');
     inputIf.removeEventListener('keyup', draw);
     inputIf.removeEventListener('focus', focusTextbox);
+    inputIf.removeEventListener('change', changeValue);
     const inputThen = divItem.querySelector('input[data-type="then"]');
     inputThen.removeEventListener('keyup', draw);
     inputThen.removeEventListener('focus', focusTextbox);
+    inputThen.removeEventListener('change', changeValue);
     // 移除 child 和本身
     removeNode(divItem);
 }
@@ -758,6 +994,8 @@ function resetButton(type, isEnable){
         case 'down': targetId = ['btnItemDown', 'btnColorDown', 'btnTextDown']; break;
         // 移除項目，是可按還是不可按
         case 'delete': targetId = ['btnDelete']; break;
+        case 'undo': targetId = ['btnUndo']; break;
+        case 'redo': targetId = ['btnRedo']; break;
         default: return;
     }
 
@@ -777,21 +1015,22 @@ function resetButton(type, isEnable){
  * 視窗變更大小的事件
  */
 function resizeWindow(){
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    let width = window.innerWidth;
+    let height = window.innerHeight;
     // 取較小者塞滿
     const length = Math.min(width, height);
+    const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+    if (isPortrait){
+        width = length;
+        height = parseInt(length * 3 / 4);
+    }
+    else{
+        width = length * 4 / 3;
+        height = length;
+    }
     const divCanvas = document.querySelector('div.canvas');
-    divCanvas.style.width = `${length}px`;
-    divCanvas.style.height = `${length}px`;
-}
-
-/**
- * 設置畫在背景顏色
- * @param {string} rgb 色碼
- */
-function setCanvasColor(rgb){
-    document.getElementById('colCanvasBg').value = rgb;
+    divCanvas.style.width = `${width}px`;
+    divCanvas.style.height = `${height}px`;
 }
 
 /**
@@ -808,11 +1047,32 @@ function setCanvasSize(width, height){
 }
 
 /**
- * 設置文字顏色
- * @param {string} rgb 色碼
+ * 依 id 或編號，設定顏色並回傳原來的值
+ * @param {string|number} identifier id 或編號
+ * @param {string} rgb 顏色碼
+ * @returns 原來的值
  */
-function setFontColor(rgb){
-    document.getElementById('colFont').value = rgb;
+function setColor(identifier, rgb){
+    const color = isNaN(identifier) ? document.getElementById(identifier) : getItemList(identifier).querySelector('input[type="color"]');
+    const oldValue = color.getAttribute('data-value');
+    color.value = rgb;
+    color.setAttribute('data-value', rgb);
+    return oldValue;
+}
+
+/**
+ * 依指定的編號選取起項目
+ * @param {number[]} indexs 指定編號
+ */
+function selectItem(indexs){
+    const selectedList = getSelectCheckbox();
+    for (const box of selectedList){
+        box.checked = false;
+    }
+    const items = getItemList();
+    for (const index of indexs){
+        items[index].querySelector('input[type="checkbox"]').checked = true;
+    }
 }
 
 /**
@@ -820,24 +1080,39 @@ function setFontColor(rgb){
  * @param {string} width 1600/1300/1000/700/min
  */
 function setSelectWidth(width){
-    document.getElementById('selSize').value = width;
+    const list = document.getElementById('size-select')
+    const oldValue = list.getAttribute('data-value');
+    list.value = width;
+    list.setAttribute('data-value', width);
+    return oldValue;
 }
 
 /**
- * 設置標題顏色
- * @param {string} rgb 色碼
+ * 設定剛完成的步驟到 undo list
+ * @param {Array} data 能夠表示動作的陣列
  */
-function setTitleColor(rgb){
-    document.getElementById('colTitleBg').value = rgb;
+function setStep(data){
+    undoList.push(data);
+    if (redoList.length > 0){
+        redoList.splice(0, redoList.length);
+    }
 }
 
 /**
- * 設置標題文字
- * @param {string} text 文字
+ * 依 id 或編號，設定文字到 if 或 then
+ * @param {string|number} identifier id 或編號
+ * @param {string} content 文字內容
+ * @param {string} type if/then
+ * @returns 原文字
  */
-function setTitleText(text){
-    document.getElementById('textTitle').value = text;
+function setText(identifier, content, type){
+    const textBox = isNaN(identifier) ? document.getElementById(identifier) : getItemList(identifier).querySelector(`input[data-type="${type}"]`);
+    const oldValue = textBox.getAttribute('data-value');
+    textBox.value = content;
+    textBox.setAttribute('data-value', content);
+    return oldValue;
 }
+
 
 /**
  * 將兩個項目的內容對調
@@ -860,14 +1135,9 @@ function swap(type, item1, item2){
         item1.querySelector('input[data-type="then"]').value = item2.querySelector('input[data-type="then"]').value;
         item2.querySelector('input[data-type="then"]').value = temp;
     }
-    if(item1.querySelector('input[type="checkbox"]').checked){
-        item1.querySelector('input[type="checkbox"]').checked = false;
-        item2.querySelector('input[type="checkbox"]').checked = true;
-    }
-    else{
-        item1.querySelector('input[type="checkbox"]').checked = true;
-        item2.querySelector('input[type="checkbox"]').checked = false;
-    }
+    temp = item1.querySelector('input[type="checkbox"]').checked;
+    item1.querySelector('input[type="checkbox"]').checked = item2.querySelector('input[type="checkbox"]').checked;
+    item2.querySelector('input[type="checkbox"]').checked = temp;
 }
 
 /**
@@ -879,10 +1149,24 @@ function transferCanvasToImg(){
 }
 
 /**
+ * 復原動作
+ */
+function undo(){
+    if (undoList.length === 0){
+        return;
+    }
+    const data = undoList.pop();
+    const recover = doStep(data);
+    redoList.push(recover);
+    draw();
+    checkButton();
+}
+
+/**
  * 使用範本資料
  */
 function useSample(){
-    setTitleText('蛋的多元宇宙');
+    setText('textTitle', '蛋的多元宇宙');
     createItem(null, '蛋沒漲價', '不顧蛋農生計');
     createItem(null, '蛋漲價了', '不顧消費者民生');
     createItem(null, '蓋新的養雞場', '不顧環保');
@@ -890,7 +1174,7 @@ function useSample(){
     createItem(null, '進口雞蛋', '不顧蛋農生計');
     createItem(null, '不進口雞蛋', '不顧消費者民生');
     setSelectWidth('1600');
-    setFontColor('#000000');
-    setCanvasColor('#fff8f4');
-    setTitleColor('#ffffff');
+    setColor('font-color', '#000000');
+    setColor('canvas-color', '#fff8f4');
+    setColor('title-color', '#ffffff');
 }

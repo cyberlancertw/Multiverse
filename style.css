@@ -1,6 +1,7 @@
 *{
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 
@@ -9,6 +10,16 @@
         font-size: 18px;
     }
     
+    div.container{
+        width: 100%;
+        display: flex;
+        height: 100vh;
+        flex-wrap: wrap;
+    }
+
+    div.title{
+        width: calc(100vw - 100vh * 4 / 3);
+    }
 }
 
 @media (orientation: portrait){
@@ -22,18 +33,6 @@
         height: 100vh;
     }
 
-    div.canvas{
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: #fff8f4;
-    }
-    
-    #imgShow{
-        max-width: 100%;
-        max-height: 100%;
-
-    }
     div.title{
         display: flex;
         width: 100%;
@@ -54,11 +53,8 @@
     }
 
     div.button-item > button.function{
-        width: 4rem;
-        height: 4rem;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        width: calc(100vw / 6);
+        height: calc(100vw / 6);
     }
     div.button-item > button.function > span{
         display: none;
@@ -79,19 +75,12 @@
         display: flex;
         align-items: center;
     }
-    input[type="checkbox"]{
-        width: 2rem;
-        height: 2rem;
-    }
-    input[type="color"]{
-        width: 2rem;
-        height: 2rem;
-    }
+
     input[data-type="if"], input[data-type="then"]{
-        width: calc(50% - 0.6rem);
-        line-height: 1.5rem;
-        padding: 0.2rem 0.2rem 0.2rem 0.2rem;
-        font-size: 1.2rem;
+        width: 50%;
+        height: 2rem;
+        padding: 0.25rem;
+        font-size: 1rem;
         
     }
     select{
@@ -116,11 +105,56 @@ canvas{
 button.function{
     display: flex;
     align-items: center;
+    justify-content: center;
     padding: 0.2rem;
     cursor: pointer;
+    border-radius: 0;
+    color: #404040;
+    background-color: #f0f0f0;
+    border: 1px solid #a0a0a0;
+}
+
+button.function:hover{
+    background-color: #e0e0e0;
+}
+
+button.function:hover:disabled{
+    background-color: #f0f0f0;;
+}
+
+button.function:active{
+    background-color: #d0d0d0;
+}
+button.function:disabled{
+    color: #c0c0c0;
+    cursor:not-allowed;
 }
 
 button.function > span{
     font-size: 0.9rem;
 }
 
+#imgShow{
+    max-width: 100%;
+    max-height: 100%;
+
+}
+
+div.canvas{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff8f4;
+}
+
+input[type="checkbox"]{
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0;
+}
+input[type="color"]{
+    width: 2rem;
+    height: 2rem;
+    border-radius: 0;
+    border: none;
+}

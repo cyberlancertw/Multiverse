@@ -15,12 +15,12 @@
             <canvas id="canvasDownload"></canvas>
         </div>
         <div class="title">
-            <input type="color" id="colFont" />
-            <input type="color" id="colCanvasBg" />
-            <textarea id="textTitle" placeholder="什麼的多元宇宙">OO的
+            <input type="color" id="font-color" data-type="font-color" data-value="" />
+            <input type="color" id="canvas-color" data-type="canvas-color" data-value="" />
+            <textarea id="textTitle" placeholder="什麼的多元宇宙" data-type="title-text" data-value="123">OO的
 多元宇宙</textarea>
-            <input type="color" id="colTitleBg" />
-            <select id="selSize">
+            <input type="color" id="title-color" data-type="title-color" data-value="" />
+            <select id="size-select" data-type="size-select" data-value="1600">
                 <option value="1600">XL</option>
                 <option value="1300">L</option>
                 <option value="1000">M</option>
@@ -53,6 +53,12 @@
                 </svg>
                 <span class="describe">文字上移</span>
             </button>
+            <button class="function" id="btnUndo" title="還原">
+                <svg class="icon" viewBox="0 0 900 900">
+                    <path d="M383.2 110l-300 300a56.5 56.5 0 0 0 0 80l300 300v-250a487.5 487.5 0 0 1 450 300a450.9 450.9 0 0 0 -450 -480z" fill="currentColor"></path>
+                </svg>
+                <span class="describe">還原</span>
+            </button>
             <button class="function" id="btnDownload" title="下載圖檔">
                 <svg class="icon" viewBox="0 0 900 900">
                     <path d="M20 880a2400 4000 0 0 1 860 0zM673 140.8a117.84 117.84 0 1 1 -28.8 228a264 160 0 0 1 -397.6 -5.6a103.2 103.2 0 1 1 -76.8 -191.2a88 88 0 0 1 138.4 -80a226.4 226.4 0 0 1 364.8 48.8zM637 148a190 190 0 0 0 -307 -30a88 88 0 0 1 9 20l-24 19a55 55 0 1 0 -96 47a67 67 0 1 0 40 109a240 160 0 0 0 365 -1a76 76 0 1 0 -17 -81a148 148 0 0 0 -225 42l-9 -32a160 160 0 0 1 223.2 -62.4a96 96 0 0 1 40.8 -30.6zM418.8 450h62.4l18.2 136.5h79.3l-106.6 191.1a24.05 24.05 0 0 1 -44.2 0l-106.6 -191.1h79.3l18.2 -136.5z" fill="currentColor"></path>
@@ -82,6 +88,12 @@
                     <path d="M280 80L370 50A150 1200 0 0 1 406 138L364 150H600V232H514A520 600 0 0 1 403 429A500 400 0 0 0 613 519A230 400 0 0 0 559 597A500 400 0 0 1 337 493A520 600 0 0 1 108 600A170 300 0 0 0 58 525A520 600 0 0 0 274 432A400 550 0 0 1 162 232H70V150H306A150 1200 0 0 0 280 80zM418 232H250A500 400 0 0 0 339 372A500 400 0 0 0 418 232zM605 641.75l125 216.5a23.05 23.05 0 0 0 40 0l125 -216.5z" fill="currentColor"></path>
                 </svg>
                 <span class="describe">文字下移</span>
+            </button>
+            <button class="function" id="btnRedo" title="重做">
+                <svg class="icon" viewBox="0 0 900 900">
+                    <path d="M516.8 110l300 300a56.5 56.5 0 0 1 0 80l-300 300v-250a487.5 487.5 0 0 0 -450 300a450.9 450.9 0 0 1 450 -480z" fill="currentColor"></path>
+                </svg>
+                <span class="describe">重做</span>
             </button>
             <button class="function" id="btnLink" title="取得連結">
                 <svg class="icon" viewBox="0 0 900 900">
