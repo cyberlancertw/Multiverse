@@ -824,6 +824,11 @@ function getTitleLines(){
     return (title && title.length > 0) ? title.replaceAll('\r\n', '\n').split('\n') : [];
 }
 
+/**
+ * 依 id 取得 DOM 的值
+ * @param {string} id DOM 的 id
+ * @returns 
+ */
 function getValue(id){
     return document.getElementById(id).value;
 }
@@ -1020,17 +1025,25 @@ function resizeWindow(){
     // 取較小者塞滿
     const length = Math.min(width, height);
     const isPortrait = window.matchMedia('(orientation: portrait)').matches;
+    const divImageWrap = document.querySelector('div.image-wrap');
+    const divCanvas = document.querySelector('div.canvas');
+    const divControl = document.querySelector('div.control');
+    width = length;
     if (isPortrait){
-        width = length;
         height = parseInt(length * 3 / 4);
+        divImageWrap.style.width = `${width}px`;
+        divImageWrap.style.height = `${height}px`;
+        divCanvas.style.height = `calc(${height}px + 3rem)`;
+        divControl.style.width = '';
+        divControl.style.height = `calc(100vh - ${height}px - 3rem)`;
     }
     else{
-        width = length * 4 / 3;
-        height = length;
+        divImageWrap.style.width = `${width}px`;
+        divImageWrap.style.height = 'calc(100vh - 3rem)';
+        divCanvas.style.height = '';
+        divControl.style.width = `calc(100vw - ${width}px)`;
+        divControl.style.height = '';
     }
-    const divCanvas = document.querySelector('div.canvas');
-    divCanvas.style.width = `${width}px`;
-    divCanvas.style.height = `${height}px`;
 }
 
 /**
@@ -1112,7 +1125,6 @@ function setText(identifier, content, type){
     textBox.setAttribute('data-value', content);
     return oldValue;
 }
-
 
 /**
  * 將兩個項目的內容對調

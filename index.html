@@ -10,99 +10,105 @@
     <div class="container">
         <div class="canvas">
             <a href="" id="downloadLink"></a>
-            <img id="imgShow" />
+            <div class="title">
+                <input type="color" id="font-color" data-type="font-color" data-value="" />
+                <input type="color" id="canvas-color" data-type="canvas-color" data-value="" />
+                <textarea id="textTitle" placeholder="什麼的多元宇宙" data-type="title-text" data-value="123">OO的
+    多元宇宙</textarea>
+                <input type="color" id="title-color" data-type="title-color" data-value="" />
+                <select id="size-select" data-type="size-select" data-value="1600">
+                    <option value="1600">XL</option>
+                    <option value="1300">L</option>
+                    <option value="1000">M</option>
+                    <option value="700">S</option>
+                    <option value="min">XS</option>
+                </select>
+            </div>
+            <div class="image-wrap">
+                <img id="imgShow" />
+            </div>
             <!--<canvas id="canvasShow"></canvas>-->
             <canvas id="canvasDownload"></canvas>
         </div>
-        <div class="title">
-            <input type="color" id="font-color" data-type="font-color" data-value="" />
-            <input type="color" id="canvas-color" data-type="canvas-color" data-value="" />
-            <textarea id="textTitle" placeholder="什麼的多元宇宙" data-type="title-text" data-value="123">OO的
-多元宇宙</textarea>
-            <input type="color" id="title-color" data-type="title-color" data-value="" />
-            <select id="size-select" data-type="size-select" data-value="1600">
-                <option value="1600">XL</option>
-                <option value="1300">L</option>
-                <option value="1000">M</option>
-                <option value="700">S</option>
-                <option value="min">XS</option>
-            </select>
-        </div>
-        <div class="button-item">
-            <button class="function" id="btnCreate" title="新增項目">
-                <svg class="icon" viewBox="0 0 900 900">
-                    <path d="M100 400l30 -30h240v-240l30 -30h100l30 30v240h240l30 30v100l-30 30h-240v240l-30 30h-100l-30 -30v-240h-240l-30 -30z" fill="currentColor"></path>
-                </svg>
-                <span class="describe">新增項目</span>
-            </button>
-            <button class="function" id="btnItemUp" title="項目上移">
-                <svg class="icon" viewBox="0 0 900 900">
-                    <path d="M740 518l-250 -433a46.1 46.1 0 0 0 -80 0 l-250 433h190l20 320h160l20 -320z" fill="currentColor"></path>
-                </svg>
-                <span class="describe">項目上移</span>
-            </button>
-            <button class="function" id="btnColorUp" title="顏色上移">
-                <svg class="icon" viewBox="0 0 900 900">
-                    <path d="M25 357A344 337 0 0 1 369 20A357 326 0 0 1 726 346A200 219 0 0 1 526 565A180 40 0 0 1 420 540A62 62 0 0 0 333 615A56 56 0 0 1 265 693A370 355 0 0 1 25 357zM188 188A56 56 0 0 0 188 300A56 56 0 0 0 188 188zM343 75A56 56 0 0 0 343 187A56 56 0 0 0 343 75zM528 135A56 56 0 0 0 528 247A56 56 0 0 0 528 135zM591 315A56 56 0 0 0 591 427A56 56 0 0 0 591 315zM895 858.25l-125 -216.5a23.05 23.05 0 0 0 -40 0l-125 216.5z" fill="currentColor"></path>
-                </svg>
-                <span class="describe">顏色上移</span>
-            </button>
-            <button class="function" id="btnTextUp" title="文字上移">
-                <svg class="icon" viewBox="0 0 900 900">
-                    <path d="M280 80L370 50A150 1200 0 0 1 406 138L364 150H600V232H514A520 600 0 0 1 403 429A500 400 0 0 0 613 519A230 400 0 0 0 559 597A500 400 0 0 1 337 493A520 600 0 0 1 108 600A170 300 0 0 0 58 525A520 600 0 0 0 274 432A400 550 0 0 1 162 232H70V150H306A150 1200 0 0 0 280 80zM418 232H250A500 400 0 0 0 339 372A500 400 0 0 0 418 232zM895 858.25l-125 -216.5a23.05 23.05 0 0 0 -40 0l-125 216.5z" fill="currentColor"></path>
-                </svg>
-                <span class="describe">文字上移</span>
-            </button>
-            <button class="function" id="btnUndo" title="還原">
-                <svg class="icon" viewBox="0 0 900 900">
-                    <path d="M383.2 110l-300 300a56.5 56.5 0 0 0 0 80l300 300v-250a487.5 487.5 0 0 1 450 300a450.9 450.9 0 0 0 -450 -480z" fill="currentColor"></path>
-                </svg>
-                <span class="describe">還原</span>
-            </button>
-            <button class="function" id="btnDownload" title="下載圖檔">
-                <svg class="icon" viewBox="0 0 900 900">
-                    <path d="M20 880a2400 4000 0 0 1 860 0zM673 140.8a117.84 117.84 0 1 1 -28.8 228a264 160 0 0 1 -397.6 -5.6a103.2 103.2 0 1 1 -76.8 -191.2a88 88 0 0 1 138.4 -80a226.4 226.4 0 0 1 364.8 48.8zM637 148a190 190 0 0 0 -307 -30a88 88 0 0 1 9 20l-24 19a55 55 0 1 0 -96 47a67 67 0 1 0 40 109a240 160 0 0 0 365 -1a76 76 0 1 0 -17 -81a148 148 0 0 0 -225 42l-9 -32a160 160 0 0 1 223.2 -62.4a96 96 0 0 1 40.8 -30.6zM418.8 450h62.4l18.2 136.5h79.3l-106.6 191.1a24.05 24.05 0 0 1 -44.2 0l-106.6 -191.1h79.3l18.2 -136.5z" fill="currentColor"></path>
-                </svg>
-                <span class="describe">下載圖檔</span>
-            </button>
-            <button class="function" id="btnDelete" title="移除項目">
-                <svg class="icon" viewBox="0 0 900 900">
-                    <path d="M237.9 167.2h42.4l169.7 169.7l169.7 -169.7h42.4l70.7 70.7v42.4l-169.7 169.7l169.7 169.7v42.4l-70.7 70.7h-42.4l-169.7 -169.7l-169.7 169.7h-42.4l-70.7 -70.7v-42.4l169.7 -169.7l-169.7 -169.7v-42.4z" fill="currentColor"></path>
-                </svg>
-                <span class="describe">移除項目</span>
-            </button>
-            <button class="function" id="btnItemDown" title="項目下移">
-                <svg class="icon" viewBox="0 0 900 900">
-                    <path d="M740 382l-250 433a46.1 46.1 0 0 1 -80 0l-250 -433h190l20 -320h160l20 320z" fill="currentColor"></path>
-                </svg>
-                <span class="describe">項目下移</span>
-            </button>
-            <button class="function" id="btnColorDown" title="顏色下移">
-                <svg class="icon" viewBox="0 0 900 900">
-                    <path d="M25 357A344 337 0 0 1 369 20A357 326 0 0 1 726 346A200 219 0 0 1 526 565A180 40 0 0 1 420 540A62 62 0 0 0 333 615A56 56 0 0 1 265 693A370 355 0 0 1 25 357zM188 188A56 56 0 0 0 188 300A56 56 0 0 0 188 188zM343 75A56 56 0 0 0 343 187A56 56 0 0 0 343 75zM528 135A56 56 0 0 0 528 247A56 56 0 0 0 528 135zM591 315A56 56 0 0 0 591 427A56 56 0 0 0 591 315zM605 641.75l125 216.5a23.05 23.05 0 0 0 40 0l125 -216.5z" fill="currentColor"></path>
-                </svg>
-                <span class="describe">顏色下移</span>
-            </button>
-            <button class="function" id="btnTextDown" title="文字下移">
-                <svg class="icon" viewBox="0 0 900 900">
-                    <path d="M280 80L370 50A150 1200 0 0 1 406 138L364 150H600V232H514A520 600 0 0 1 403 429A500 400 0 0 0 613 519A230 400 0 0 0 559 597A500 400 0 0 1 337 493A520 600 0 0 1 108 600A170 300 0 0 0 58 525A520 600 0 0 0 274 432A400 550 0 0 1 162 232H70V150H306A150 1200 0 0 0 280 80zM418 232H250A500 400 0 0 0 339 372A500 400 0 0 0 418 232zM605 641.75l125 216.5a23.05 23.05 0 0 0 40 0l125 -216.5z" fill="currentColor"></path>
-                </svg>
-                <span class="describe">文字下移</span>
-            </button>
-            <button class="function" id="btnRedo" title="重做">
-                <svg class="icon" viewBox="0 0 900 900">
-                    <path d="M516.8 110l300 300a56.5 56.5 0 0 1 0 80l-300 300v-250a487.5 487.5 0 0 0 -450 300a450.9 450.9 0 0 1 450 -480z" fill="currentColor"></path>
-                </svg>
-                <span class="describe">重做</span>
-            </button>
-            <button class="function" id="btnLink" title="取得連結">
-                <svg class="icon" viewBox="0 0 900 900">
-                    <path d="M548.1 326.7a135 135 0 0 0 -51.3 -48.6l99.9 -99.9a138.6 138.6 0 0 1 190.8 202.5l-213.3 213.3a138.6 138.6 0 0 1 -179.8 -213.3l28.8 -27a52.2 52.2 0 0 1 46.8 48.6l-40.5 42.3a64.8 64.8 0 0 0 113.4 81.9l193.5 -199.8a64.8 64.8 0 0 0 -97.2 -90.9l-90.9 90.9zM351.9 573.3a135 135 0 0 0 51.3 48.6l-99.9 99.9a138.6 138.6 0 0 1 -190.8 -202.5l213.3 -213.3a138.6 138.6 0 0 1 180 213.3l-28.8 27a52.2 52.2 0 0 1 -46.8 -48.6l40.5 -42.3a64.8 64.8 0 0 0 -113.4 -81.9l-193.5 199.8a64.8 64.8 0 0 0 97.2 90.9l90.9 -90.9z" fill="currentColor"></path>
-                </svg>
-                <span class="describe">取得連結</span>
-            </button>
-        </div>
-        <div class="item-list" id="item-list"></div><!--
+        <div class="control">
+            <div class="func-item">
+                <div class="button-item">
+                    <button class="function" id="btnCreate" title="新增項目">
+                        <svg class="icon" viewBox="0 0 900 900">
+                            <path d="M100 400l30 -30h240v-240l30 -30h100l30 30v240h240l30 30v100l-30 30h-240v240l-30 30h-100l-30 -30v-240h-240l-30 -30z" fill="currentColor"></path>
+                        </svg>
+                        <span class="describe">新增項目</span>
+                    </button>
+                    <button class="function" id="btnItemUp" title="項目上移">
+                        <svg class="icon" viewBox="0 0 900 900">
+                            <path d="M740 518l-250 -433a46.1 46.1 0 0 0 -80 0 l-250 433h190l20 320h160l20 -320z" fill="currentColor"></path>
+                        </svg>
+                        <span class="describe">項目上移</span>
+                    </button>
+                    <button class="function" id="btnColorUp" title="顏色上移">
+                        <svg class="icon" viewBox="0 0 900 900">
+                            <path d="M25 357A344 337 0 0 1 369 20A357 326 0 0 1 726 346A200 219 0 0 1 526 565A180 40 0 0 1 420 540A62 62 0 0 0 333 615A56 56 0 0 1 265 693A370 355 0 0 1 25 357zM188 188A56 56 0 0 0 188 300A56 56 0 0 0 188 188zM343 75A56 56 0 0 0 343 187A56 56 0 0 0 343 75zM528 135A56 56 0 0 0 528 247A56 56 0 0 0 528 135zM591 315A56 56 0 0 0 591 427A56 56 0 0 0 591 315zM895 858.25l-125 -216.5a23.05 23.05 0 0 0 -40 0l-125 216.5z" fill="currentColor"></path>
+                        </svg>
+                        <span class="describe">顏色上移</span>
+                    </button>
+                    <button class="function" id="btnTextUp" title="文字上移">
+                        <svg class="icon" viewBox="0 0 900 900">
+                            <path d="M280 80L370 50A150 1200 0 0 1 406 138L364 150H600V232H514A520 600 0 0 1 403 429A500 400 0 0 0 613 519A230 400 0 0 0 559 597A500 400 0 0 1 337 493A520 600 0 0 1 108 600A170 300 0 0 0 58 525A520 600 0 0 0 274 432A400 550 0 0 1 162 232H70V150H306A150 1200 0 0 0 280 80zM418 232H250A500 400 0 0 0 339 372A500 400 0 0 0 418 232zM895 858.25l-125 -216.5a23.05 23.05 0 0 0 -40 0l-125 216.5z" fill="currentColor"></path>
+                        </svg>
+                        <span class="describe">文字上移</span>
+                    </button>
+                    <button class="function" id="btnUndo" title="還原">
+                        <svg class="icon" viewBox="0 0 900 900">
+                            <path d="M383.2 110l-300 300a56.5 56.5 0 0 0 0 80l300 300v-250a487.5 487.5 0 0 1 450 300a450.9 450.9 0 0 0 -450 -480z" fill="currentColor"></path>
+                        </svg>
+                        <span class="describe">還原</span>
+                    </button>
+                    <button class="function" id="btnDownload" title="下載圖檔">
+                        <svg class="icon" viewBox="0 0 900 900">
+                            <path d="M20 880a2400 4000 0 0 1 860 0zM673 140.8a117.84 117.84 0 1 1 -28.8 228a264 160 0 0 1 -397.6 -5.6a103.2 103.2 0 1 1 -76.8 -191.2a88 88 0 0 1 138.4 -80a226.4 226.4 0 0 1 364.8 48.8zM637 148a190 190 0 0 0 -307 -30a88 88 0 0 1 9 20l-24 19a55 55 0 1 0 -96 47a67 67 0 1 0 40 109a240 160 0 0 0 365 -1a76 76 0 1 0 -17 -81a148 148 0 0 0 -225 42l-9 -32a160 160 0 0 1 223.2 -62.4a96 96 0 0 1 40.8 -30.6zM418.8 450h62.4l18.2 136.5h79.3l-106.6 191.1a24.05 24.05 0 0 1 -44.2 0l-106.6 -191.1h79.3l18.2 -136.5z" fill="currentColor"></path>
+                        </svg>
+                        <span class="describe">下載圖檔</span>
+                    </button>
+                    <button class="function" id="btnDelete" title="移除項目">
+                        <svg class="icon" viewBox="0 0 900 900">
+                            <path d="M237.9 167.2h42.4l169.7 169.7l169.7 -169.7h42.4l70.7 70.7v42.4l-169.7 169.7l169.7 169.7v42.4l-70.7 70.7h-42.4l-169.7 -169.7l-169.7 169.7h-42.4l-70.7 -70.7v-42.4l169.7 -169.7l-169.7 -169.7v-42.4z" fill="currentColor"></path>
+                        </svg>
+                        <span class="describe">移除項目</span>
+                    </button>
+                    <button class="function" id="btnItemDown" title="項目下移">
+                        <svg class="icon" viewBox="0 0 900 900">
+                            <path d="M740 382l-250 433a46.1 46.1 0 0 1 -80 0l-250 -433h190l20 -320h160l20 320z" fill="currentColor"></path>
+                        </svg>
+                        <span class="describe">項目下移</span>
+                    </button>
+                    <button class="function" id="btnColorDown" title="顏色下移">
+                        <svg class="icon" viewBox="0 0 900 900">
+                            <path d="M25 357A344 337 0 0 1 369 20A357 326 0 0 1 726 346A200 219 0 0 1 526 565A180 40 0 0 1 420 540A62 62 0 0 0 333 615A56 56 0 0 1 265 693A370 355 0 0 1 25 357zM188 188A56 56 0 0 0 188 300A56 56 0 0 0 188 188zM343 75A56 56 0 0 0 343 187A56 56 0 0 0 343 75zM528 135A56 56 0 0 0 528 247A56 56 0 0 0 528 135zM591 315A56 56 0 0 0 591 427A56 56 0 0 0 591 315zM605 641.75l125 216.5a23.05 23.05 0 0 0 40 0l125 -216.5z" fill="currentColor"></path>
+                        </svg>
+                        <span class="describe">顏色下移</span>
+                    </button>
+                    <button class="function" id="btnTextDown" title="文字下移">
+                        <svg class="icon" viewBox="0 0 900 900">
+                            <path d="M280 80L370 50A150 1200 0 0 1 406 138L364 150H600V232H514A520 600 0 0 1 403 429A500 400 0 0 0 613 519A230 400 0 0 0 559 597A500 400 0 0 1 337 493A520 600 0 0 1 108 600A170 300 0 0 0 58 525A520 600 0 0 0 274 432A400 550 0 0 1 162 232H70V150H306A150 1200 0 0 0 280 80zM418 232H250A500 400 0 0 0 339 372A500 400 0 0 0 418 232zM605 641.75l125 216.5a23.05 23.05 0 0 0 40 0l125 -216.5z" fill="currentColor"></path>
+                        </svg>
+                        <span class="describe">文字下移</span>
+                    </button>
+                    <button class="function" id="btnRedo" title="重做">
+                        <svg class="icon" viewBox="0 0 900 900">
+                            <path d="M516.8 110l300 300a56.5 56.5 0 0 1 0 80l-300 300v-250a487.5 487.5 0 0 0 -450 300a450.9 450.9 0 0 1 450 -480z" fill="currentColor"></path>
+                        </svg>
+                        <span class="describe">重做</span>
+                    </button>
+                    <button class="function" id="btnLink" title="取得連結">
+                        <svg class="icon" viewBox="0 0 900 900">
+                            <path d="M548.1 326.7a135 135 0 0 0 -51.3 -48.6l99.9 -99.9a138.6 138.6 0 0 1 190.8 202.5l-213.3 213.3a138.6 138.6 0 0 1 -179.8 -213.3l28.8 -27a52.2 52.2 0 0 1 46.8 48.6l-40.5 42.3a64.8 64.8 0 0 0 113.4 81.9l193.5 -199.8a64.8 64.8 0 0 0 -97.2 -90.9l-90.9 90.9zM351.9 573.3a135 135 0 0 0 51.3 48.6l-99.9 99.9a138.6 138.6 0 0 1 -190.8 -202.5l213.3 -213.3a138.6 138.6 0 0 1 180 213.3l-28.8 27a52.2 52.2 0 0 1 -46.8 -48.6l40.5 -42.3a64.8 64.8 0 0 0 -113.4 -81.9l-193.5 199.8a64.8 64.8 0 0 0 97.2 90.9l90.9 -90.9z" fill="currentColor"></path>
+                        </svg>
+                        <span class="describe">取得連結</span>
+                    </button>
+                </div>
+                <div class="item-list" id="item-list"></div>
+            </div>
+        </div><!--
             <div class="item">
                 <div class="item-block">
                     <input type="checkbox" />
